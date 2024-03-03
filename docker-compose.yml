@@ -1,0 +1,26 @@
+version: "3.7"
+services:
+  nginx:
+    container_name: nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    networks:
+      - angiday-network
+
+  angiday-be:
+    container_name: angiday-be
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      - angiday-network
+    depends_on:
+      - nginx
+
+networks:
+  angiday-network:
+    driver: bridge
