@@ -10,6 +10,16 @@ services:
     networks:
       - angiday-network
 
+  mysql:
+    container_name: mysql
+    image: mysql:latest
+    restart: always
+    networks:
+      - angiday-network
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: angiday_dev
+
   angiday-be:
     container_name: angiday-be
     build:
@@ -20,6 +30,9 @@ services:
       - angiday-network
     depends_on:
       - nginx
+      - mysql
+    env_file:
+      - local.env
 
 networks:
   angiday-network:
