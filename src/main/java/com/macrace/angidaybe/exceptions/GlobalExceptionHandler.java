@@ -1,5 +1,6 @@
 package com.macrace.angidaybe.exceptions;
 
+import com.macrace.angidaybe.constant.ErrorCode;
 import com.macrace.angidaybe.dto.response.ErrorResponseTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -25,7 +26,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(GeneralException.class)
     public ResponseEntity<ErrorResponseTemplate> handleGeneralException(GeneralException e) {
         return ResponseEntity.ok(
-                new ErrorResponseTemplate(e.getMessage(), e.getCode(), new Object())
+                new ErrorResponseTemplate(e.getMessage(), e.getCode(), null)
         );
     }
 
@@ -34,7 +35,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         log.error("PhoneNumberExistException {}", e.getMessage());
         return new ResponseEntity<>(new ErrorResponseTemplate(
                 "Phone number exists",
-                String.valueOf(HttpStatus.BAD_REQUEST.value()),
+                String.valueOf(ErrorCode.PHONE_NUMBER_DUPLICATE),
                 null
         ), HttpStatus.BAD_REQUEST);
     }
