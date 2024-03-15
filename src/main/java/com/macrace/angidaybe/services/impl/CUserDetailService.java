@@ -22,11 +22,11 @@ public class CUserDetailService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) {
         Optional<User> userOptional = userRepository.findByUsername(username);
         if (userOptional.isEmpty()) {
             log.warn("Username {} not found", username);
-            throw new GeneralException("Username {} not found", String.valueOf(HttpStatus.NOT_FOUND.value()));
+            throw new GeneralException("Username not found", String.valueOf(HttpStatus.NOT_FOUND.value()));
         }
 
         return new CUserDetail(

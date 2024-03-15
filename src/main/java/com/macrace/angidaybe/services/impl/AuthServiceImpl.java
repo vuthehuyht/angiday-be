@@ -1,5 +1,6 @@
 package com.macrace.angidaybe.services.impl;
 
+import com.macrace.angidaybe.constant.ErrorCode;
 import com.macrace.angidaybe.custom.CUserDetail;
 import com.macrace.angidaybe.dto.request.AuthRequest;
 import com.macrace.angidaybe.dto.request.RegisterRequest;
@@ -68,7 +69,7 @@ public class AuthServiceImpl implements AuthService {
         Optional<User> userOptional = userRepository.findByUsername(request.getUsername());
         if(userOptional.isPresent()) {
             log.error("Phone number {} exist", request.getUsername());
-            throw new PhoneNumberExistException();
+            throw new PhoneNumberExistException("Phone number exist", String.valueOf(ErrorCode.PHONE_NUMBER_DUPLICATE));
         }
 
         User newUser = User.builder()
