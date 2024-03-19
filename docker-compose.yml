@@ -8,16 +8,14 @@ services:
     ports:
       - "80:80"
     networks:
-      - angiday-network
-    depends_on:
-      - angiday-be
+      - angiday-microservice-network
 
   mysql:
     container_name: mysql
     image: mysql:latest
     restart: always
     networks:
-      - angiday-network
+      - angiday-microservice-network
     environment:
       MYSQL_ROOT_PASSWORD: 123456
       MYSQL_DATABASE: angiday_dev
@@ -27,19 +25,13 @@ services:
       timeout: 5s
       retries: 10
 
-  angiday-be:
-    container_name: angiday-be
-    build:
-      context: .
-      dockerfile: Dockerfile
+  angiday-discovery-service:
+    container_name: angiday-discovery-service
+    build: ./discovery-service
     restart: on-failure
     networks:
-      - angiday-network
-    depends_on:
-      - mysql
-    env_file:
-      - local.env
+      - angiday-microservice-network
 
 networks:
-  angiday-network:
+  angiday-microservice-network:
     driver: bridge

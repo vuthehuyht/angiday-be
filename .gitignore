@@ -1,6 +1,6 @@
 HELP.md
 target/
-!.mvn/wrapper/maven-wrapper.jar
+!auth-service/.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
@@ -34,3 +34,6 @@ build/
 
 ### VS Code ###
 local.env
+
+### VS Code ###
+discovery-service/target
