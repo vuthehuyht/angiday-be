@@ -6,4 +6,5 @@ public record ErrorResponseTemplate(
         String message,
         String code,
         @JsonProperty("data") Object data
-) { }
+) {
+}

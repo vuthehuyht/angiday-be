@@ -10,7 +10,6 @@ import org.springframework.http.HttpMethod;
 import java.io.IOException;
 
 import static org.springframework.http.HttpHeaders.*;
-import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_MAX_AGE;
 
 @Configuration
 @Slf4j
@@ -25,7 +24,7 @@ public class CorFilter implements Filter {
         httpServletResponse.setHeader(ACCESS_CONTROL_ALLOW_HEADERS, "*");
         httpServletResponse.setHeader(ACCESS_CONTROL_MAX_AGE, "3600");
 
-        if(HttpMethod.OPTIONS.name().equalsIgnoreCase(((HttpServletRequest) servletRequest).getMethod())) {
+        if (HttpMethod.OPTIONS.name().equalsIgnoreCase(((HttpServletRequest) servletRequest).getMethod())) {
             httpServletResponse.setStatus(HttpServletResponse.SC_OK);
         }
 
