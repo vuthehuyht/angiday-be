@@ -18,7 +18,7 @@ public class LogoutService implements LogoutHandler {
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         final String authHeader = request.getHeader("Authorization");
         final String accessToken;
-        if(authHeader == null || authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || authHeader.startsWith("Bearer ")) {
             return;
         }
 

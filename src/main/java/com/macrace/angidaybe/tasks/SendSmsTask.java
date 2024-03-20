@@ -14,14 +14,14 @@ import java.net.URL;
 @Scope("prototype")
 @Slf4j
 public class SendSmsTask implements Runnable {
-    private String endpoint;
-    private String user;
-    private String password;
-    private String cpCode;
-    private String brandName;
-    private String receiverPhoneNumber;
+    private final String endpoint;
+    private final String user;
+    private final String password;
+    private final String cpCode;
+    private final String brandName;
+    private final String receiverPhoneNumber;
 
-    private String message;
+    private final String message;
 
     public SendSmsTask(String endpoint, String user, String password, String cpCode, String brandName, String receiverPhoneNumber, String message) {
         this.endpoint = endpoint;

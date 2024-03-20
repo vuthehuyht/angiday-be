@@ -7,5 +7,6 @@ import com.macrace.angidaybe.dto.response.RegisterResponse;
 
 public interface AuthService {
     AuthResponse login(AuthRequest request);
+
     RegisterResponse register(RegisterRequest request);
 }
