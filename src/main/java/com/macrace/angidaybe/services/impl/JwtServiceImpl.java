@@ -11,17 +11,13 @@ import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j

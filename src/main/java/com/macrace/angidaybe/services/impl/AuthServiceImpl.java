@@ -23,7 +23,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.Optional;
 
 @Service
@@ -67,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public RegisterResponse register(RegisterRequest request) {
         Optional<User> userOptional = userRepository.findByUsername(request.getUsername());
-        if(userOptional.isPresent()) {
+        if (userOptional.isPresent()) {
             log.error("Phone number {} exist", request.getUsername());
             throw new PhoneNumberExistException("Phone number exist", String.valueOf(ErrorCode.PHONE_NUMBER_DUPLICATE));
         }
