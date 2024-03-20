@@ -4,12 +4,13 @@ LABEL service-name=discovery-service
 MAINTAINER vuthehuyvnu@gmail.com
 
 WORKDIR /build
-COPY .mvn/ .mvn
-RUN cd .mvn && ls -la
-COPY mvnw pom.xml ./
+#COPY .mvn/ .mvn
+#RUN cd .mvn && ls -la
+#COPY mvnw pom.xml ./
+#RUN chmod +x -R ./mvnw\
+COPY . .
 RUN chmod +x -R ./mvnw
 RUN ./mvnw dependency:go-offline
-COPY ./src ./src
 RUN ./mvnw clean install -DskipTests
 
 FROM eclipse-temurin:17-jre-alpine
