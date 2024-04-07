@@ -5,7 +5,6 @@ import com.macrace.angidaybe.services.OtpService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +23,6 @@ public class OtpController {
     @PostMapping
     public ResponseEntity<?> verifyOtp(@Valid @RequestBody OtpRequest request) {
         log.info("Handling verify OTP request");
-        otpService.verifyOtp(request);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.ok().body(otpService.verifyOtp(request));
     }
 }

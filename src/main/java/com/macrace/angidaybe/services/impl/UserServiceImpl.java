@@ -7,6 +7,7 @@ import com.macrace.angidaybe.services.UserService;
 import com.macrace.angidaybe.tasks.SendSmsTask;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,8 @@ import java.util.concurrent.TimeUnit;
 public class UserServiceImpl extends SoapConfig implements UserService {
     private final TaskExecutor executor;
     private final RedisTemplate<String, String> redisTemplate;
-    private static final Integer EXPIRED_MIN = 1;
+    @Value("${redis.time-to-live-otp}")
+    private int TIME_TO_LIVE_OTP;
 
     @Override
     public ForgetPasswordResponse sentOtp(ForgotPasswordRequest request) {
@@ -28,16 +30,16 @@ public class UserServiceImpl extends SoapConfig implements UserService {
                 + otpCode +
                 " hieu luc trong 1 phut. Khong duoc chia se ma nay voi nguoi khac";
 
-        redisTemplate.opsForValue().set(request.getPhoneNumber(), otpCode, 5, TimeUnit.SECONDS);
-//        executor.execute(new SendSmsTask(
-//                getEndpoint(),
-//                getUser(),
-//                getPassword(),
-//                getCpCode(),
-//                getBrandName(),
-//                request.getPhoneNumber(),
-//                message
-//        ));
+        redisTemplate.opsForValue().set(request.getPhoneNumber(), otpCode, TIME_TO_LIVE_OTP, TimeUnit.SECONDS);
+        executor.execute(new SendSmsTask(
+                getEndpoint(),
+                getUser(),
+                getPassword(),
+                getCpCode(),
+                getBrandName(),
+                request.getPhoneNumber(),
+                message
+        ));
 
         log.info("OTP was sent {}", request.getPhoneNumber());
         return new ForgetPasswordResponse("Your OTP was sent. Please wait");

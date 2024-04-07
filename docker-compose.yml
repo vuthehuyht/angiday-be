@@ -6,8 +6,6 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
     restart: on-failure
-    depends_on:
-      - angiday-be
     ports:
       - "80:80"
     networks:
@@ -42,7 +40,7 @@ services:
       - mysql
       - redis
     env_file:
-      - local.env
+      - .env.dev
 
   redis:
     container_name: redis
