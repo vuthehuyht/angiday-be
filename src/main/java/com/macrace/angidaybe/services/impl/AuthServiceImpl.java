@@ -6,6 +6,7 @@ import com.macrace.angidaybe.dto.request.AuthRequest;
 import com.macrace.angidaybe.dto.request.RegisterRequest;
 import com.macrace.angidaybe.dto.response.AuthResponse;
 import com.macrace.angidaybe.dto.response.RegisterResponse;
+import com.macrace.angidaybe.exceptions.GeneralException;
 import com.macrace.angidaybe.exceptions.PhoneNumberExistException;
 import com.macrace.angidaybe.models.Token;
 import com.macrace.angidaybe.models.User;
@@ -13,7 +14,6 @@ import com.macrace.angidaybe.repositories.TokenRepository;
 import com.macrace.angidaybe.repositories.UserRepository;
 import com.macrace.angidaybe.services.AuthService;
 import com.macrace.angidaybe.services.JwtService;
-import com.macrace.angidaybe.types.TokenType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -40,6 +41,16 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse login(AuthRequest request) {
         CUserDetail userDetail = (CUserDetail) cUserDetailService.loadUserByUsername(request.getUsername());
+        if (!passwordEncoder.matches(request.getPassword(), userDetail.getPassword())) {
+            throw new GeneralException("Username or Password incorrect", "600");
+        }
+
+        Optional<User> userOptional = userRepository.findByUsername(request.getUsername());
+        List<Token> tokens = tokenRepository.findAllTokenByUserId(userOptional.get().getId());
+        tokens.forEach(token -> {
+            token.setExpired(true);
+            tokenRepository.save(token);
+        });
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -52,11 +63,9 @@ public class AuthServiceImpl implements AuthService {
         var refreshToken = jwtService.refreshToken(userDetail);
 
         var token = Token.builder()
-                .user(userRepository.findByUsername(request.getUsername()).get())
+                .user(userOptional.get())
                 .token(accessToken)
-                .tokenType(TokenType.BEARER)
                 .expired(false)
-                .revoked(false)
                 .build();
         tokenRepository.save(token);
 

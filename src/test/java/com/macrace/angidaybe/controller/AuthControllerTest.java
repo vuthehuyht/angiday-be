@@ -5,11 +5,13 @@ import com.macrace.angidaybe.dto.request.AuthRequest;
 import com.macrace.angidaybe.dto.request.RegisterRequest;
 import com.macrace.angidaybe.services.AuthService;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,6 +99,21 @@ public class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("404"))
                 .andExpect(jsonPath("$.message").value("Username not found"));
+    }
+
+    @Test
+    void testLoginWitPasswordWrong() throws Exception {
+        createDataTest();
+
+        AuthRequest request = new AuthRequest();
+        request.setUsername("0123456789");
+        request.setPassword("1234567890");
+
+        mockMvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsBytes(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("600"))
+                .andExpect(jsonPath("$.message").value("Username or Password incorrect"));
         ;
     }
 
@@ -141,20 +158,6 @@ public class AuthControllerTest {
     }
 
     @Test
-    void testRegisterWithPasswordAtLeast8Characters() throws Exception {
-        RegisterRequest request = new RegisterRequest();
-        request.setUsername("0123456789");
-        request.setPassword("123456");
-        request.setConfirmPassword("123456");
-        request.setFullName("test");
-
-        mockMvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(objectMapper.writeValueAsBytes(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0]").value("Password is at least 8 characters"));
-    }
-
-    @Test
     void testRegisterWithConfirmPasswordBlank() throws Exception {
         RegisterRequest request = new RegisterRequest();
         request.setUsername("0123456789");
@@ -196,6 +199,20 @@ public class AuthControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("600"))
                 .andExpect(jsonPath("$.message").value("Phone number exists"));
+    }
+
+    @Test
+    void testRegisterWithPasswordAtLeast8Character() throws Exception {
+        RegisterRequest request = new RegisterRequest();
+        request.setUsername("0123456789");
+        request.setPassword("123456");
+        request.setConfirmPassword("123456789");
+        request.setFullName("test");
+
+        mockMvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsBytes(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0]").value("Password at least 8 characters"));
     }
 
     private void createDataTest() {

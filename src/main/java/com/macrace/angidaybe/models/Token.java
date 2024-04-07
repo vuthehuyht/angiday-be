@@ -1,6 +1,5 @@
 package com.macrace.angidaybe.models;
 
-import com.macrace.angidaybe.types.TokenType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,14 +18,10 @@ public class Token {
     @Column(unique = true)
     private String token;
 
-    @Enumerated(EnumType.STRING)
-    private TokenType tokenType = TokenType.BEARER;
-
-    private boolean revoked;
-
+    @Column(name = "expired")
     private boolean expired;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
     @JoinColumn(name = "user_id")
     private User user;
 }
