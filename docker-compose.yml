@@ -5,6 +5,9 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile
+    restart: on-failure
+    depends_on:
+      - angiday-be
     ports:
       - "80:80"
     networks:
@@ -13,7 +16,6 @@ services:
   mysql:
     container_name: mysql
     image: mysql:latest
-    command: --default-authentication-plugin=mysql_native_password
     restart: always
     networks:
       - angiday-network
@@ -30,10 +32,17 @@ services:
     networks:
       - angiday-network
     depends_on:
-      - nginx
       - mysql
+      - redis
     env_file:
       - local.env
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    restart: on-failure
+    networks:
+      - angiday-network
 
 networks:
   angiday-network:

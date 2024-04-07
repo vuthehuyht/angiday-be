@@ -39,6 +39,7 @@ public class FilterChainConfig {
                         .requestMatchers("/api/v1/demo").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/user/forget-password").permitAll()
+                        .requestMatchers("/api/v1/otp").permitAll()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider)
