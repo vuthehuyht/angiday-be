@@ -1,6 +1,7 @@
 package com.macrace.angidaybe.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.macrace.angidaybe.validator.AtLeast8Character;
 import com.macrace.angidaybe.validator.PasswordMatching;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -19,7 +20,7 @@ public class RegisterRequest {
     private String username;
 
     @NotBlank(message = "Password is required")
-    @Size(min = 8, message = "Password is at least 8 characters")
+    @AtLeast8Character
     private String password;
 
     @NotBlank(message = "Confirm password is required")
