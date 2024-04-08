@@ -26,7 +26,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(GeneralException.class)
     public ResponseEntity<ErrorResponseTemplate> handleGeneralException(GeneralException e) {
         return ResponseEntity.ok(
-                new ErrorResponseTemplate(e.getMessage(), e.getCode(), null)
+                new ErrorResponseTemplate(e.getMessage(), e.getCode())
         );
     }
 
@@ -35,8 +35,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         log.error("PhoneNumberExistException {}", e.getMessage());
         return new ResponseEntity<>(new ErrorResponseTemplate(
                 "Phone number exists",
-                String.valueOf(ErrorCode.PHONE_NUMBER_DUPLICATE),
-                null
+                String.valueOf(ErrorCode.PHONE_NUMBER_DUPLICATE)
         ), HttpStatus.BAD_REQUEST);
     }
 
@@ -54,5 +53,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         responseBody.put("errors", errors);
         log.info(responseBody.toString());
         return new ResponseEntity<>(responseBody, headers, status);
+    }
+
+    @ExceptionHandler(OtpExpiredException.class)
+    public ResponseEntity<Object> handleOtpExpiredException(OtpExpiredException e) {
+        log.error("OtpExpiredException {}", e.getMessage());
+        return new ResponseEntity<>(new ErrorResponseTemplate(
+                e.getMessage(),
+                e.getCode()
+        ), HttpStatus.BAD_REQUEST);
     }
 }

@@ -1,6 +1,5 @@
 package com.macrace.angidaybe.services.impl;
 
-import com.macrace.angidaybe.constant.ErrorCode;
 import com.macrace.angidaybe.custom.CUserDetail;
 import com.macrace.angidaybe.dto.request.AuthRequest;
 import com.macrace.angidaybe.dto.request.RegisterRequest;
@@ -26,6 +25,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static com.macrace.angidaybe.constant.ErrorCode.PHONE_NUMBER_DUPLICATE;
+import static com.macrace.angidaybe.constant.ErrorCode.USERNAME_OR_PASSWORD_WRONG;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -42,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse login(AuthRequest request) {
         CUserDetail userDetail = (CUserDetail) cUserDetailService.loadUserByUsername(request.getUsername());
         if (!passwordEncoder.matches(request.getPassword(), userDetail.getPassword())) {
-            throw new GeneralException("Username or Password incorrect", "600");
+            throw new GeneralException("Username or Password incorrect", String.valueOf(USERNAME_OR_PASSWORD_WRONG));
         }
 
         Optional<User> userOptional = userRepository.findByUsername(request.getUsername());
@@ -77,7 +79,7 @@ public class AuthServiceImpl implements AuthService {
         Optional<User> userOptional = userRepository.findByUsername(request.getUsername());
         if (userOptional.isPresent()) {
             log.error("Phone number {} exist", request.getUsername());
-            throw new PhoneNumberExistException("Phone number exist", String.valueOf(ErrorCode.PHONE_NUMBER_DUPLICATE));
+            throw new PhoneNumberExistException("Phone number exist", String.valueOf(PHONE_NUMBER_DUPLICATE));
         }
 
         User newUser = User.builder()

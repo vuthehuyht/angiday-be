@@ -1,6 +1,7 @@
 package com.macrace.angidaybe.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.macrace.angidaybe.constant.ErrorCode;
 import com.macrace.angidaybe.dto.request.AuthRequest;
 import com.macrace.angidaybe.dto.request.RegisterRequest;
 import com.macrace.angidaybe.services.AuthService;
@@ -112,7 +113,7 @@ public class AuthControllerTest {
         mockMvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsBytes(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("600"))
+                .andExpect(jsonPath("$.code").value(String.valueOf(ErrorCode.USERNAME_OR_PASSWORD_WRONG)))
                 .andExpect(jsonPath("$.message").value("Username or Password incorrect"));
         ;
     }
@@ -197,7 +198,7 @@ public class AuthControllerTest {
         mockMvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsBytes(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("600"))
+                .andExpect(jsonPath("$.code").value(String.valueOf(ErrorCode.PHONE_NUMBER_DUPLICATE)))
                 .andExpect(jsonPath("$.message").value("Phone number exists"));
     }
 
