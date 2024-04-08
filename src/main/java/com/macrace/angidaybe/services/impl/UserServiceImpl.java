@@ -3,6 +3,10 @@ package com.macrace.angidaybe.services.impl;
 import com.macrace.angidaybe.config.SoapConfig;
 import com.macrace.angidaybe.dto.request.ForgotPasswordRequest;
 import com.macrace.angidaybe.dto.response.ForgetPasswordResponse;
+import com.macrace.angidaybe.dto.response.UserInfoResponse;
+import com.macrace.angidaybe.exceptions.UserNotFoundException;
+import com.macrace.angidaybe.models.User;
+import com.macrace.angidaybe.repositories.UserRepository;
 import com.macrace.angidaybe.services.UserService;
 import com.macrace.angidaybe.tasks.SendSmsTask;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +16,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -22,6 +27,7 @@ public class UserServiceImpl extends SoapConfig implements UserService {
     private final RedisTemplate<String, String> redisTemplate;
     @Value("${redis.time-to-live-otp}")
     private int TIME_TO_LIVE_OTP;
+    private final UserRepository userRepository;
 
     @Override
     public ForgetPasswordResponse sentOtp(ForgotPasswordRequest request) {
@@ -43,6 +49,19 @@ public class UserServiceImpl extends SoapConfig implements UserService {
 
         log.info("OTP was sent {}", request.getPhoneNumber());
         return new ForgetPasswordResponse("Your OTP was sent. Please wait");
+    }
+
+    @Override
+    public UserInfoResponse getUserInfo(Long userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+
+        return new UserInfoResponse(
+                userOptional.get().getUsername(),
+                userOptional.get().getFullName()
+        );
     }
 
     private String generateOTP() {
