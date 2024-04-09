@@ -7,8 +7,10 @@ import com.macrace.angidaybe.dto.response.AuthResponse;
 import com.macrace.angidaybe.dto.response.RegisterResponse;
 import com.macrace.angidaybe.exceptions.GeneralException;
 import com.macrace.angidaybe.exceptions.PhoneNumberExistException;
+import com.macrace.angidaybe.models.Role;
 import com.macrace.angidaybe.models.Token;
 import com.macrace.angidaybe.models.User;
+import com.macrace.angidaybe.repositories.RoleRepository;
 import com.macrace.angidaybe.repositories.TokenRepository;
 import com.macrace.angidaybe.repositories.UserRepository;
 import com.macrace.angidaybe.services.AuthService;
@@ -22,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +42,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
+    private final RoleRepository roleRepository;
 
     @Override
     public AuthResponse login(AuthRequest request) {
@@ -82,10 +86,12 @@ public class AuthServiceImpl implements AuthService {
             throw new PhoneNumberExistException("Phone number exist", String.valueOf(PHONE_NUMBER_DUPLICATE));
         }
 
+        Role role = roleRepository.findByName("ROLE_USER").get();
         User newUser = User.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName())
+                .roles(Collections.singleton(role))
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();

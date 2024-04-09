@@ -2,6 +2,8 @@ package com.macrace.angidaybe.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.macrace.angidaybe.config.JwtConfig;
+import com.macrace.angidaybe.models.Token;
+import com.macrace.angidaybe.repositories.TokenRepository;
 import com.macrace.angidaybe.services.JwtService;
 import com.macrace.angidaybe.utils.GeneralExceptionUtil;
 import io.jsonwebtoken.Claims;
@@ -20,6 +22,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -29,6 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final ObjectMapper objectMapper;
     private final JwtConfig jwtConfig;
     private final List<String> ALLOW_PATH = new ArrayList<>();
+    private final TokenRepository tokenRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -45,17 +49,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             try {
                 if (jwtService.isValidToken(accessToken)) {
-                    Claims claims = jwtService.extractClaims(accessToken);
-                    var username = claims.getSubject();
+                    Optional<Token> tokenOptional = tokenRepository.findByToken(accessToken);
+                    if (tokenOptional.isPresent() && !tokenOptional.get().isExpired()) {
+                        Claims claims = jwtService.extractClaims(accessToken);
+                        var username = claims.getSubject();
 
-                    List<String> authorities = claims.get("authorities", List.class);
-                    if (username != null) {
-                        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                                username,
-                                null,
-                                authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList())
-                        );
-                        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                        List<String> authorities = claims.get("authorities", List.class);
+                        if (username != null) {
+                            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                                    username,
+                                    null,
+                                    authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList())
+                            );
+                            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                        }
+                    } else {
+                        log.error("Error message: Access token is unavailable");
+                        var msgError = GeneralExceptionUtil.handleTokenUnavailable();
+                        var msgJson = objectMapper.writeValueAsString(msgError);
+
+                        returnResponse(response, msgJson);
                     }
                 }
             } catch (Exception e) {
@@ -63,13 +76,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 var msgError = GeneralExceptionUtil.handleUnauthorized();
                 var msgJson = objectMapper.writeValueAsString(msgError);
 
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                response.getWriter().write(msgJson);
+                returnResponse(response, msgJson);
             }
         }
 
         log.info("End filter {}", request.getRequestURI());
         filterChain.doFilter(request, response);
+    }
+
+    private void returnResponse(HttpServletResponse response, String msg) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(msg);
     }
 }

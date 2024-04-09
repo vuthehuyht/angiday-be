@@ -13,4 +13,11 @@ public class GeneralExceptionUtil {
         customMessageException.setCode(String.valueOf(HttpStatus.UNAUTHORIZED.value()));
         return customMessageException;
     }
+
+    public static GeneralException handleTokenUnavailable() {
+        GeneralException customMessageException = new GeneralException();
+        customMessageException.setMessage("Token is unavailable");
+        customMessageException.setCode("606");
+        return customMessageException;
+    }
 }

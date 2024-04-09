@@ -31,7 +31,7 @@ public class JwtServiceImpl extends JwtConfig implements JwtService {
                 .parserBuilder()
                 .setSigningKey(getKey())
                 .build()
-                .parseClaimsJwt(token)
+                .parseClaimsJws(token)
                 .getBody();
     }
 
@@ -88,7 +88,7 @@ public class JwtServiceImpl extends JwtConfig implements JwtService {
             return Jwts.parserBuilder()
                     .setSigningKey(getKey())
                     .build()
-                    .parseClaimsJwt(token)
+                    .parseClaimsJws(token)
                     .getBody();
         } catch (UnsupportedJwtException e) {
             log.error("Unsupport JWT token {}", e.getLocalizedMessage());
