@@ -4,7 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.macrace.angidaybe.constant.ErrorCode;
 import com.macrace.angidaybe.dto.request.AuthRequest;
 import com.macrace.angidaybe.dto.request.RegisterRequest;
+import com.macrace.angidaybe.models.Role;
+import com.macrace.angidaybe.repositories.RoleRepository;
 import com.macrace.angidaybe.services.AuthService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +39,9 @@ public class AuthControllerTest {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Test
     void authControllerInitializedCorrectly() {
@@ -120,6 +127,11 @@ public class AuthControllerTest {
 
     @Test
     void testRegisterValidRequest() throws Exception {
+        Role role = Role.builder()
+                .name("ROLE_USER")
+                .build();
+        roleRepository.save(role);
+
         RegisterRequest request = new RegisterRequest();
         request.setUsername("0123456789");
         request.setPassword("12345678");
@@ -217,6 +229,11 @@ public class AuthControllerTest {
     }
 
     private void createDataTest() {
+        Role role = Role.builder()
+                .name("ROLE_USER")
+                .build();
+        roleRepository.save(role);
+
         RegisterRequest request = new RegisterRequest();
         request.setUsername("0123456789");
         request.setPassword("12345678");
