@@ -5,8 +5,9 @@ import com.macrace.angidaybe.dto.request.AuthRequest;
 import com.macrace.angidaybe.dto.request.RegisterRequest;
 import com.macrace.angidaybe.dto.response.AuthResponse;
 import com.macrace.angidaybe.dto.response.RegisterResponse;
-import com.macrace.angidaybe.exceptions.GeneralException;
+import com.macrace.angidaybe.enums.ErrorCode;
 import com.macrace.angidaybe.exceptions.PhoneNumberExistException;
+import com.macrace.angidaybe.exceptions.UsernameOrPasswordWrongException;
 import com.macrace.angidaybe.models.Role;
 import com.macrace.angidaybe.models.Token;
 import com.macrace.angidaybe.models.User;
@@ -28,9 +29,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static com.macrace.angidaybe.constant.ErrorCode.PHONE_NUMBER_DUPLICATE;
-import static com.macrace.angidaybe.constant.ErrorCode.USERNAME_OR_PASSWORD_WRONG;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -48,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse login(AuthRequest request) {
         CUserDetail userDetail = (CUserDetail) cUserDetailService.loadUserByUsername(request.getUsername());
         if (!passwordEncoder.matches(request.getPassword(), userDetail.getPassword())) {
-            throw new GeneralException("Username or Password incorrect", String.valueOf(USERNAME_OR_PASSWORD_WRONG));
+            throw new UsernameOrPasswordWrongException(ErrorCode.USERNAME_OR_PASSWORD_WRONG);
         }
 
         Optional<User> userOptional = userRepository.findByUsername(request.getUsername());
@@ -83,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
         Optional<User> userOptional = userRepository.findByUsername(request.getUsername());
         if (userOptional.isPresent()) {
             log.error("Phone number {} exist", request.getUsername());
-            throw new PhoneNumberExistException("Phone number exist", String.valueOf(PHONE_NUMBER_DUPLICATE));
+            throw new PhoneNumberExistException(ErrorCode.PHONE_NUMBER_DUPLICATE);
         }
 
         Role role = roleRepository.findByName("ROLE_USER").get();

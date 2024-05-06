@@ -1,22 +1,17 @@
 package com.macrace.angidaybe.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.macrace.angidaybe.constant.ErrorCode;
 import com.macrace.angidaybe.dto.request.AuthRequest;
 import com.macrace.angidaybe.dto.request.RegisterRequest;
 import com.macrace.angidaybe.models.Role;
 import com.macrace.angidaybe.repositories.RoleRepository;
 import com.macrace.angidaybe.services.AuthService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -119,8 +114,8 @@ public class AuthControllerTest {
 
         mockMvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsBytes(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(String.valueOf(ErrorCode.USERNAME_OR_PASSWORD_WRONG)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(601))
                 .andExpect(jsonPath("$.message").value("Username or Password incorrect"));
         ;
     }
@@ -135,12 +130,11 @@ public class AuthControllerTest {
         RegisterRequest request = new RegisterRequest();
         request.setUsername("0123456789");
         request.setPassword("12345678");
-        request.setConfirmPassword("12345678");
         request.setFullName("test");
 
         mockMvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsBytes(request)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -148,13 +142,12 @@ public class AuthControllerTest {
         RegisterRequest request = new RegisterRequest();
         request.setUsername("");
         request.setPassword("12345678");
-        request.setConfirmPassword("12345678");
         request.setFullName("test");
 
         mockMvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsBytes(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0]").value("Username is required"));
+                .andExpect(jsonPath("$.message").value("Username is required"));
     }
 
     @Test
@@ -162,34 +155,6 @@ public class AuthControllerTest {
         RegisterRequest request = new RegisterRequest();
         request.setUsername("0123456789");
         request.setPassword("");
-        request.setConfirmPassword("12345678");
-        request.setFullName("test");
-
-        mockMvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(objectMapper.writeValueAsBytes(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void testRegisterWithConfirmPasswordBlank() throws Exception {
-        RegisterRequest request = new RegisterRequest();
-        request.setUsername("0123456789");
-        request.setPassword("12345678");
-        request.setConfirmPassword("");
-        request.setFullName("test");
-
-        mockMvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(objectMapper.writeValueAsBytes(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0]").value("Confirm password is required"));
-    }
-
-    @Test
-    void testRegisterWithPasswordNotMatch() throws Exception {
-        RegisterRequest request = new RegisterRequest();
-        request.setUsername("0123456789");
-        request.setPassword("12345678");
-        request.setConfirmPassword("123456789");
         request.setFullName("test");
 
         mockMvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -204,14 +169,13 @@ public class AuthControllerTest {
         RegisterRequest request = new RegisterRequest();
         request.setUsername("0123456789");
         request.setPassword("12345678");
-        request.setConfirmPassword("12345678");
         request.setFullName("test 1");
 
         mockMvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsBytes(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(String.valueOf(ErrorCode.PHONE_NUMBER_DUPLICATE)))
-                .andExpect(jsonPath("$.message").value("Phone number exists"));
+                .andExpect(jsonPath("$.code").value(600))
+                .andExpect(jsonPath("$.message").value("Phone number exist"));
     }
 
     @Test
@@ -219,13 +183,13 @@ public class AuthControllerTest {
         RegisterRequest request = new RegisterRequest();
         request.setUsername("0123456789");
         request.setPassword("123456");
-        request.setConfirmPassword("123456789");
         request.setFullName("test");
 
         mockMvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsBytes(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0]").value("Password at least 8 characters"));
+                .andExpect(jsonPath("$.code").value(606))
+                .andExpect(jsonPath("$.message").value("Password at least 8 characters"));
     }
 
     private void createDataTest() {
@@ -237,7 +201,6 @@ public class AuthControllerTest {
         RegisterRequest request = new RegisterRequest();
         request.setUsername("0123456789");
         request.setPassword("12345678");
-        request.setConfirmPassword("12345678");
         request.setFullName("test");
 
         authService.register(request);

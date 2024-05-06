@@ -1,66 +1,112 @@
 package com.macrace.angidaybe.exceptions;
 
-import com.macrace.angidaybe.constant.ErrorCode;
+import com.macrace.angidaybe.dto.response.ApiResponse;
 import com.macrace.angidaybe.dto.response.ErrorResponseTemplate;
+import com.macrace.angidaybe.enums.ErrorCode;
+import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 @ControllerAdvice
 @Slf4j
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+public class GlobalExceptionHandler {
+    private static final String MIN_ATTRIBUTE = "min";
+
+    @ExceptionHandler(value = Exception.class)
+    ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
+        log.error("Exception: ", exception);
+        ApiResponse apiResponse = new ApiResponse();
+
+        apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
+        apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
+
+        return ResponseEntity.badRequest().body(apiResponse);
+    }
+
     @ExceptionHandler(GeneralException.class)
     public ResponseEntity<ErrorResponseTemplate> handleGeneralException(GeneralException e) {
-        return ResponseEntity.ok(
-                new ErrorResponseTemplate(e.getMessage(), e.getCode())
-        );
+        return ResponseEntity.ok(new ErrorResponseTemplate(e.getMessage(), e.getCode()));
     }
 
     @ExceptionHandler(PhoneNumberExistException.class)
-    public ResponseEntity<Object> handlePhoneNumberExistException(PhoneNumberExistException e) {
+    public ResponseEntity<ApiResponse> handlePhoneNumberExistException(PhoneNumberExistException e) {
+        ErrorCode errorCode = e.getErrorCode();
+
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(errorCode.getMessage());
+
         log.error("PhoneNumberExistException {}", e.getMessage());
-        return new ResponseEntity<>(new ErrorResponseTemplate(
-                "Phone number exists",
-                String.valueOf(ErrorCode.PHONE_NUMBER_DUPLICATE)
-        ), HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
 
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("timestamp", new Date());
-        responseBody.put("status", status.value());
+    @ExceptionHandler(value = MethodArgumentNotValidException.class)
+    ResponseEntity<ApiResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        String enumKey = e.getFieldError().getDefaultMessage();
 
-        List<String> errors = ex.getBindingResult().getFieldErrors()
-                .stream()
-                .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .collect(Collectors.toList());
+        ErrorCode errorCode = ErrorCode.INVALID_KEY;
+        Map<String, Object> attributes = null;
 
-        responseBody.put("errors", errors);
-        log.info(responseBody.toString());
-        return new ResponseEntity<>(responseBody, headers, status);
+        try {
+            errorCode = ErrorCode.valueOf(enumKey);
+            var constraintViolation = e.getBindingResult().getAllErrors().get(0).unwrap(ConstraintViolation.class);
+            attributes = constraintViolation.getConstraintDescriptor().getAttributes();
+            log.info(attributes.toString());
+        } catch (IllegalArgumentException ignored) {
+
+        }
+
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(Objects.nonNull(attributes) ? mapAttribute(errorCode.getMessage(), attributes) : errorCode.getMessage());
+        return ResponseEntity.badRequest().body(apiResponse);
     }
 
     @ExceptionHandler(OtpExpiredException.class)
-    public ResponseEntity<Object> handleOtpExpiredException(OtpExpiredException e) {
+    public ResponseEntity<ApiResponse> handleOtpExpiredException(OtpExpiredException e) {
+        ErrorCode errorCode = e.getErrorCode();
+
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(errorCode.getMessage());
+
         log.error("OtpExpiredException {}", e.getMessage());
-        return new ResponseEntity<>(new ErrorResponseTemplate(
-                e.getMessage(),
-                e.getCode()
-        ), HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
+    }
+
+    @ExceptionHandler(OtpIncorrectException.class)
+    public ResponseEntity<ApiResponse> handleOtpIncorrectException(OtpIncorrectException e) {
+        ErrorCode errorCode = e.getErrorCode();
+
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(errorCode.getMessage());
+
+        log.error("OtpIncorrectException {}", e.getMessage());
+        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
+    }
+
+    @ExceptionHandler(UsernameOrPasswordWrongException.class)
+    public ResponseEntity<ApiResponse> handleUsernameOrPasswordWrongException(UsernameOrPasswordWrongException e) {
+        ErrorCode errorCode = e.getErrorCode();
+
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(errorCode.getMessage());
+
+        log.error("UsernameOrPasswordWrongException {}", e.getMessage());
+        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
+    }
+
+
+    private String mapAttribute(String message, Map<String, Object> attributes) {
+        String minValue = String.valueOf(attributes.get(MIN_ATTRIBUTE));
+        return message.replace("{" + MIN_ATTRIBUTE + "}", minValue);
     }
 }

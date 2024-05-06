@@ -2,6 +2,7 @@ package com.macrace.angidaybe.services.impl;
 
 import com.macrace.angidaybe.dto.request.OtpRequest;
 import com.macrace.angidaybe.dto.response.OtpResponse;
+import com.macrace.angidaybe.enums.ErrorCode;
 import com.macrace.angidaybe.exceptions.OtpExpiredException;
 import com.macrace.angidaybe.exceptions.OtpIncorrectException;
 import com.macrace.angidaybe.services.OtpService;
@@ -19,7 +20,7 @@ public class OtpServiceImpl implements OtpService {
         String otpCode = redisTemplate.opsForValue().get(request.getPhoneNumber());
         redisTemplate.delete(request.getPhoneNumber());
         if (otpCode == null) {
-            throw new OtpExpiredException();
+            throw new OtpExpiredException(ErrorCode.OTP_EXPIRED);
         }
         if (!otpCode.equals(request.getOtpCode())) {
             throw new OtpIncorrectException();

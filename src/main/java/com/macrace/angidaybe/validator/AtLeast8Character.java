@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface AtLeast8Character {
-    String message() default "Password at least 8 characters";
+    String message() default "PASSWORD_INVALID";
 
     Class<?>[] groups() default {};
 

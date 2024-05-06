@@ -41,8 +41,8 @@ public class UserControllerTest {
         mockMvc.perform(post("/api/v1/user/forget-password").contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsBytes(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0]").value("Phone number is required"));
-        ;
+                .andExpect(jsonPath("$.code").value(607))
+                .andExpect(jsonPath("$.message").value("Phone number is required"));
     }
 
     @Test
@@ -53,6 +53,7 @@ public class UserControllerTest {
         mockMvc.perform(post("/api/v1/user/forget-password").contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsBytes(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0]").value("Phone number wrong"));
+                .andExpect(jsonPath("$.code").value(608))
+                .andExpect(jsonPath("$.message").value("Phone number is invalid"));
     }
 }

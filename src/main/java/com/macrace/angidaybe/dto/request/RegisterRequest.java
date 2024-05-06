@@ -2,30 +2,19 @@ package com.macrace.angidaybe.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.macrace.angidaybe.validator.AtLeast8Character;
-import com.macrace.angidaybe.validator.PasswordMatching;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@PasswordMatching(
-        password = "password",
-        confirmPassword = "confirmPassword",
-        message = "Password and Confirm Password must be matched!"
-)
 public class RegisterRequest {
-    @NotBlank(message = "Username is required")
+    @NotBlank(message = "USERNAME_REQUIRED")
     private String username;
 
-    @NotBlank(message = "Password is required")
+    @NotBlank(message = "PASSWORD_REQUIRED")
     @AtLeast8Character
     private String password;
-
-    @NotBlank(message = "Confirm password is required")
-    @JsonProperty("confirm_password")
-    private String confirmPassword;
 
     @JsonProperty("full_name")
     private String fullName;

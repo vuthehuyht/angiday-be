@@ -1,5 +1,6 @@
 package com.macrace.angidaybe.dto.request;
 
+import com.macrace.angidaybe.validator.AtLeast8Character;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,9 +8,10 @@ import lombok.Setter;
 @Setter
 @Getter
 public class AuthRequest {
-    @NotBlank(message = "Username is required")
+    @NotBlank(message = "USERNAME_REQUIRED")
     private String username;
 
-    @NotBlank(message = "Password is required")
+    @NotBlank(message = "PASSWORD_REQUIRED")
+    @AtLeast8Character
     private String password;
 }

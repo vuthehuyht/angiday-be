@@ -1,13 +1,16 @@
 package com.macrace.angidaybe.exceptions;
 
+import com.macrace.angidaybe.enums.ErrorCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import static com.macrace.angidaybe.constant.ErrorCode.OTP_WRONG;
 
 @Getter
 @NoArgsConstructor
 public class OtpIncorrectException extends RuntimeException {
-    private final String message = "OTP is incorrect";
-    private final String code = String.valueOf(OTP_WRONG);
+    private ErrorCode errorCode;
+
+    public OtpIncorrectException(ErrorCode errorCode) {
+        super(errorCode.getMessage());
+        this.errorCode = errorCode;
+    }
 }
