@@ -1,11 +1,12 @@
 package com.macrace.angidaybe.controller;
 
 import com.macrace.angidaybe.dto.request.OtpRequest;
+import com.macrace.angidaybe.dto.response.ApiResponse;
 import com.macrace.angidaybe.services.OtpService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,8 +22,10 @@ public class OtpController {
     private final OtpService otpService;
 
     @PostMapping
-    public ResponseEntity<?> verifyOtp(@Valid @RequestBody OtpRequest request) {
+    public ApiResponse<?> verifyOtp(@Valid @RequestBody OtpRequest request) {
         log.info("Handling verify OTP request");
-        return ResponseEntity.ok().body(otpService.verifyOtp(request));
+        return ApiResponse.builder()
+                .code(HttpStatus.OK.value())
+                .build();
     }
 }

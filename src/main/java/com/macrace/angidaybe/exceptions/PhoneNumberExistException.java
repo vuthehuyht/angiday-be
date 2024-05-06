@@ -1,30 +1,16 @@
 package com.macrace.angidaybe.exceptions;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.macrace.angidaybe.enums.ErrorCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.io.Serial;
-
-@NoArgsConstructor
+@Setter
+@Getter
 public class PhoneNumberExistException extends RuntimeException {
-    @Serial
-    private static final long serialVersionUID = 1L;
+    private ErrorCode errorCode;
 
-    @JsonProperty("message")
-    private String message;
-
-    @Getter
-    @JsonProperty("code")
-    private String code;
-
-    public PhoneNumberExistException(String message, String code) {
-        this.message = message;
-        this.code = code;
-    }
-
-    @Override
-    public String getMessage() {
-        return message;
+    public PhoneNumberExistException(ErrorCode errorCode) {
+        super(errorCode.getMessage());
+        this.errorCode = errorCode;
     }
 }
